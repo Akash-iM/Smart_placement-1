@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student List</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h1>Students List</h1>
+
+<a href="{% url 'students:add_student' %}">➕ Add New Student</a>
+
+<br><br>
+
+<table border="1">
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Branch</th>
+<th>CGPA</th>
+<th>Actions</th>
+</tr>
+
+{% for student in students %}
+<tr>
+
+<td>
+<a href="{% url 'students:student_detail_dashboard' student.id %}">
+Dashboard
+</a>
+{{ student.name }}
+</a>
+</td>
+
+<td>{{ student.email }}</td>
+<td>{{ student.branch }}</td>
+<td>{{ student.cgpa }}</td>
+
+<td>
+<a href="{% url 'students:edit_student' student.id %}">Edit</a> |
+<a href="{% url 'students:delete_student' student.id %}">Delete</a>
+</td>
+
+</tr>
+{% endfor %}
+
+</table>
+
+<h2>CGPA Analytics</h2>
+
+<canvas id="cgpaChart" width="400" height="200"></canvas>
+
+<script>
+fetch("{% url 'students:metrics_json' %}")
+.then(response => response.json())
+.then(data => {
+
+    const ctx = document.getElementById('cgpaChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.names,
+            datasets: [{
+                label: 'Student CGPA',
+                data: data.cgpas
+            }]
+        }
+    });
+
+});
+</script>
+
+<br>
+
+<a href="{% url 'students:mock_interview' %}">🎤 Mock Interview</a>
+
+</body>
+</html>

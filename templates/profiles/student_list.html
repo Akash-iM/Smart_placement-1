@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Student Directory - SPC{% endblock %}
+
+{% block content %}
+<div class="container py-5 fade-in-up">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 mt-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1"><i class="fas fa-users text-primary me-2"></i>Global Student Directory</h2>
+            <p class="text-muted mb-0">Browse and filter all registered student portfolios.</p>
+        </div>
+        <div class="text-end text-muted small fw-bold">
+            Total Students: {{ students.count }}
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-5 bg-white">
+        <form method="GET" action="{% url 'students:all_students_list' %}" class="row g-3 align-items-end">
+            <!-- Keyword Search -->
+            <div class="col-md-5">
+                <label class="form-label fw-bold small text-muted"><i class="fas fa-search me-1"></i>Search</label>
+                <input type="text" name="q" class="form-control bg-light rounded-pill" placeholder="Name or skills..." value="{{ query }}">
+            </div>
+            
+            <!-- Branch Filter -->
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted"><i class="fas fa-code-branch me-1"></i>Branch</label>
+                <select name="branch" class="form-select bg-light rounded-pill">
+                    <option value="">All Branches</option>
+                    <option value="CSE" {% if selected_branch == 'CSE' %}selected{% endif %}>Computer Science</option>
+                    <option value="ECE" {% if selected_branch == 'ECE' %}selected{% endif %}>Electronics</option>
+                    <option value="MGT" {% if selected_branch == 'MGT' %}selected{% endif %}>Management</option>
+                    <option value="ME" {% if selected_branch == 'ME' %}selected{% endif %}>Mechanical</option>
+                    <option value="CE" {% if selected_branch == 'CE' %}selected{% endif %}>Civil</option>
+                </select>
+            </div>
+            
+            <!-- CGPA Filter -->
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted"><i class="fas fa-star text-warning me-1"></i>Min CGPA</label>
+                <input type="number" step="0.1" name="cgpa" class="form-control bg-light rounded-pill" placeholder="e.g. 7.5" value="{{ min_cgpa }}">
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary rounded-pill fw-bold shadow-sm">
+                    <i class="fas fa-filter me-2"></i>Apply
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        {% for student in students %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-lift">
+                <div class="bg-primary" style="height: 60px; background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);"></div>
+                
+                <div class="card-body text-center position-relative pt-0 px-4 pb-4">
+                    <div style="margin-top: -35px;" class="mb-3">
+                        {% if student.profile_picture %}
+                            <img src="{{ student.profile_picture.url }}" alt="Profile" class="rounded-circle border border-4 border-white shadow-sm bg-white" style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle border border-4 border-white shadow-sm bg-white text-primary d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="fw-bold text-dark mb-1">{{ student.name }}</h5>
+                    <p class="text-muted small mb-2 text-truncate" style="max-width: 100%;">{{ student.course }} - {{ student.get_branch_display }}</p>
+                    
+                    <div class="d-flex justify-content-center align-items-center gap-2 mb-3 mt-3">
+                        <span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>{{ student.cgpa }}</span>
+                        {% if student.placement_status == 'Placed' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Placed</span>
+                        {% else %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Unplaced</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-4 text-start">
+                        <p class="text-muted small fw-bold mb-1">Top Skills:</p>
+                        <div class="text-truncate small text-secondary">
+                            {{ student.skills|default:"Not provided" }}
+                        </div>
+                    </div>
+                    
+                    <!-- Action -->
+                    <div class="d-grid mt-auto">
+                        <a href="{% url 'students:student_profile_view_param' student.id %}" class="btn btn-outline-primary rounded-pill btn-sm fw-bold"><i class="fas fa-external-link-alt me-2"></i>View Digital Profile</a>
+                        <span class="small text-muted mt-2">ID: {{ student.id }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="text-muted mb-3"><i class="fas fa-search" style="font-size: 3rem;"></i></div>
+            <h4 class="fw-bold text-secondary">No students matched your search</h4>
+            <p class="text-muted">Adjust your filters and try again.</p>
+            <a href="{% url 'students:all_students_list' %}" class="btn btn-outline-primary rounded-pill px-4 mt-2">Clear Filters</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

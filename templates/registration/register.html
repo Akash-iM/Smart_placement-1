@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - SPC{% endblock %}
+
+{% block content %}
+<style>
+    .login-wrapper { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem 0; }
+    .login-container { 
+        background: rgba(255, 255, 255, 0.7); 
+        backdrop-filter: blur(20px); 
+        border-radius: 24px; 
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); 
+        border: 1px solid rgba(255, 255, 255, 0.4); 
+        padding: 4rem 3rem;
+        width: 100%; 
+        max-width: 1000px; 
+        text-align: center;
+    }
+    body[data-theme='dark'] .login-container { 
+        background: rgba(30, 30, 35, 0.8); 
+        border-color: rgba(255, 255, 255, 0.1); 
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); 
+    }
+    
+    .role-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem 1.5rem;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border: 1px solid rgba(0,0,0,0.05);
+        cursor: pointer;
+        height: 100%;
+        text-decoration: none;
+        display: block;
+    }
+    body[data-theme='dark'] .role-card {
+        background: rgba(45, 45, 50, 0.5);
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .role-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        border-color: #4f46e5;
+    }
+    
+    .role-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .role-title {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.75rem;
+    }
+    body[data-theme='dark'] .role-title { color: white; }
+    
+    .role-desc {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-container fade-in-up delay-1">
+        <div class="mb-5">
+            <h2 class="display-6 fw-bold text-dark mb-2">Join SPC Platform</h2>
+            <p class="text-muted">Select your role to continue with registration</p>
+        </div>
+        
+        <div class="row g-4 justify-content-center">
+            <!-- Student Role -->
+            <div class="col-md-4">
+                <a href="{% url 'student_register' %}" class="role-card">
+                    <div class="role-icon">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <h4 class="role-title">Student</h4>
+                    <p class="role-desc">Apply for jobs, track applications, and improve with AI mock interviews.</p>
+                </a>
+            </div>
+            
+            <!-- Recruiter Role -->
+            <div class="col-md-4">
+                <a href="{% url 'recruiter_register' %}" class="role-card">
+                    <div class="role-icon">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <h4 class="role-title">Recruiter</h4>
+                    <p class="role-desc">Post jobs, find top talent, and use AI to identify the best candidates.</p>
+                </a>
+            </div>
+            
+            <!-- Officer Role -->
+            <div class="col-md-4">
+                <a href="{% url 'officer_register' %}" class="role-card">
+                    <div class="role-icon">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <h4 class="role-title">Placement Officer</h4>
+                    <p class="role-desc">Manage placements, verify students, and oversee college-wide analytics.</p>
+                </a>
+            </div>
+        </div>
+        
+        <div class="mt-5 pt-3">
+            <p class="text-muted small">Already have an account? <a href="{% url 'login' %}" class="fw-bold text-primary text-decoration-none">Login here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

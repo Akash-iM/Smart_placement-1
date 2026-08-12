@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Analyzer - SPC{% endblock %}
+
+{% block content %}
+<style>
+    .analyzer-header {
+        background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    .analyzer-header::before {
+        content: '\f15c'; /* fa-file-lines */
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: -20px;
+        bottom: -40px;
+        font-size: 15rem;
+        opacity: 0.05;
+        transform: rotate(-15deg);
+    }
+    
+    .analyzer-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(200, 200, 200, 0.3);
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    
+    body[data-theme='dark'] .analyzer-card {
+        background: rgba(30, 30, 30, 0.8);
+        border: 1px solid rgba(100, 100, 100, 0.3);
+        color: #fff;
+    }
+
+    .resume-textarea {
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    
+    body[data-theme='dark'] .resume-textarea {
+        background: rgba(0, 0, 0, 0.3);
+        color: #ddd;
+    }
+
+    .resume-textarea:focus {
+        background: rgb(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 0.25rem rgba(78, 67, 118, 0.25);
+    }
+
+    /* Score Circle */
+    .score-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        color: white;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        position: relative;
+    }
+    .score-circle h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin: 0;
+        line-height: 1;
+    }
+    .score-circle span {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .badge-feature {
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+    .badge-strength {
+        background: rgba(25, 135, 84, 0.1);
+        border-left: 4px solid #198754;
+        color: #198754;
+    }
+    .badge-weakness {
+        background: rgba(220, 53, 69, 0.1);
+        border-left: 4px solid #dc3545;
+        color: #dc3545;
+    }
+
+    body[data-theme='dark'] .badge-strength { color: #51cf93; background: rgba(81, 207, 147, 0.1); }
+    body[data-theme='dark'] .badge-weakness { color: #f28b96; background: rgba(242, 139, 150, 0.1); }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="analyzer-header text-center text-md-start px-md-5">
+            <h1 class="display-4 fw-bold mb-2"><i class="fa-solid fa-file-contract me-3"></i>AI Resume Analyzer</h1>
+            <p class="fs-5 opacity-75 mb-0">Powered by OpenAI to grade your CV against ATS standards. Provide your resume text and target role to get actionable insights instantly.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Input Form -->
+    <div class="col-lg-{% if analysis %}6{% else %}12{% endif %}">
+        <div class="analyzer-card h-100">
+            <h4 class="fw-bold mb-3"><i class="fa-solid fa-upload me-2 text-primary"></i> Target Candidate</h4>
+            <form method="POST" id="resumeForm">
+                {% csrf_token %}
+                
+                <!-- Option 1: Select Student from Database -->
+                <div class="mb-4 p-3 border rounded-3 bg-light" style="border-color: rgba(0,0,0,0.1) !important;">
+                    <label class="form-label text-dark fw-bold"><i class="fa-solid fa-users me-2"></i>Select Registered Student</label>
+                    <select name="student_id" class="form-select resume-textarea p-3 fw-bold text-dark">
+                        <option value="">-- Choose a student to auto-analyze their resume --</option>
+                        {% for s in all_students %}
+                            <option value="{{ s.id }}" {% if student and student.id == s.id %}selected{% endif %}>{{ s.name }} ({{ s.branch }})</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted d-block mt-2"><i class="fa-solid fa-circle-info me-1"></i> Selecting a student will automatically fetch their uploaded PDF resume and predict Placement.</small>
+                </div>
+                
+                <div class="text-center mb-3 text-muted fw-bold">OR</div>
+                
+                <!-- Option 2: Manual Paste -->
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-bold">Manual: Target Job Role</label>
+                    <input type="text" name="job_role" class="form-control resume-textarea p-3" placeholder="e.g., Senior Software Engineer" value="{{ prefill_role|default_if_none:'' }}">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-muted fw-bold">Manual: Paste Resume Text</label>
+                    <textarea name="resume_text" class="form-control resume-textarea p-3" rows="8" placeholder="If not selecting a student, paste custom text here...">{{ prefill_text|default_if_none:'' }}</textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold" id="analyzeBtn" onclick="document.getElementById('analyzeBtn').innerHTML = '<i class=\'fa-solid fa-circle-notch fa-spin me-2\'></i> Running Extraction & ML...';"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>Analyze Now</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Panel -->
+    {% if analysis %}
+    <div class="col-lg-6">
+        <div class="analyzer-card h-100">
+            {% if analysis.error %}
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-triangle-exclamation text-danger" style="font-size: 4rem; opacity: 0.8"></i>
+                    <h3 class="fw-bold mt-4">Analysis Failed</h3>
+                    <p class="text-muted">{{ analysis.error }}</p>
+                </div>
+            {% else %}
+                <h4 class="fw-bold mb-4 text-center"><i class="fa-solid fa-chart-pie me-2 text-info"></i> ATS Report</h4>
+                
+                <div class="row text-center mb-4">
+                    <div class="col-6">
+                        <h6 class="fw-bold text-muted mb-3">ATS Format Score</h6>
+                        {% if analysis.score >= 80 %}
+                            <div class="score-circle mx-auto" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                                <h1>{{ analysis.score }}</h1><span>Excellent</span>
+                            </div>
+                        {% elif analysis.score >= 50 %}
+                            <div class="score-circle mx-auto" style="background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);">
+                                <h1>{{ analysis.score }}</h1><span>Average</span>
+                            </div>
+                        {% else %}
+                            <div class="score-circle mx-auto" style="background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);">
+                                <h1>{{ analysis.score }}</h1><span>Needs Work</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-6">
+                        <h6 class="fw-bold text-muted mb-3"><i class="fa-solid fa-microchip text-primary me-1"></i> ML Prediction</h6>
+                        {% if prediction %}
+                            <div class="score-circle mx-auto" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); width: 150px; height: 150px; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4);">
+                                <h1>{{ prediction }}<span style="font-size: 2rem;">%</span></h1><span style="letter-spacing: 0;">Probability</span>
+                            </div>
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100 pb-4">
+                                <div class="text-muted small p-3 border rounded-4 bg-light w-100 mx-3">
+                                    <i class="fa-solid fa-link mb-2 fs-4"></i><br>
+                                    Assign a student profile to unlock ML placement predictions.
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <p class="text-center text-muted mb-4">{{ analysis.summary }}</p>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h6 class="fw-bold text-success"><i class="fa-solid fa-thumbs-up me-2"></i>Key Strengths</h6>
+                        {% for item in analysis.strengths %}
+                            <div class="badge-feature badge-strength"><i class="fa-solid fa-check-circle me-2"></i> {{ item }}</div>
+                        {% empty %}
+                            <span class="text-muted small">No distinct strengths found.</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <h6 class="fw-bold text-danger"><i class="fa-solid fa-circle-exclamation me-2"></i>Areas to Improve</h6>
+                        {% for item in analysis.weaknesses %}
+                            <div class="badge-feature badge-weakness"><i class="fa-solid fa-xmark-circle me-2"></i> {{ item }}</div>
+                        {% empty %}
+                            <span class="text-muted small">No weaknesses found! Perfect!</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

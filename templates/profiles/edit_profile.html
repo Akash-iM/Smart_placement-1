@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile - SPC{% endblock %}
+
+{% block content %}
+<div class="container py-5 fade-in-up">
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow-sm border-0 rounded-4 p-5">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold text-dark"><i class="fas fa-user-edit text-primary me-2"></i>Update Digital Profile</h2>
+                    <p class="text-muted">Fill in your professional details to stand out to recruiters.</p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <h5 class="fw-bold text-secondary border-bottom pb-2 mb-4">Core Information</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Full Legal Name</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Contact Phone</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Degree / Course</label>
+                            {{ form.course }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Branch / Dept</label>
+                            {{ form.branch }}
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-secondary border-bottom pb-2 mb-4">Digital Links & Media</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted"><i class="fab fa-linkedin text-primary me-1"></i>LinkedIn URL</label>
+                            {{ form.linkedin_url }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted"><i class="fab fa-github text-dark me-1"></i>GitHub URL</label>
+                            {{ form.github_url }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted"><i class="fas fa-camera text-info me-1"></i>Profile Picture</label>
+                            {{ form.profile_picture }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted"><i class="fas fa-file-pdf text-danger me-1"></i>Latest Resume</label>
+                            {{ form.resume }}
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-secondary border-bottom pb-2 mb-4">Professional Overview</h5>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted">Short Headline/Bio</label>
+                        {{ form.bio }}
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted">Technical Skills (Comma separated)</label>
+                        {{ form.skills }}
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted">Projects & Experience</label>
+                        {{ form.projects }}
+                    </div>
+                    <div class="mb-5">
+                        <label class="form-label fw-bold small text-muted">Certifications & Awards</label>
+                        {{ form.certifications }}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-5">
+                        <a href="{% url 'students:student_profile_view' %}" class="btn btn-light rounded-pill px-4 text-muted fw-bold shadow-sm">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm py-2">
+                            <i class="fas fa-cloud-upload-alt me-2"></i>Save & Deploy Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

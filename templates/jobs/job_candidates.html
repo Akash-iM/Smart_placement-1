@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Candidate Matches - {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5 fade-in-up">
+    <div class="row mb-5">
+        <div class="col-md-10 mx-auto">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'students:recruiter_dashboard' %}" class="text-decoration-none">Recruiter Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'students:job_detail' job.id %}" class="text-decoration-none">{{ job.title }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AI Candidate Matches</li>
+                </ol>
+            </nav>
+            
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-gradient-primary text-white">
+                <div class="d-flex align-items-center">
+                    <i class="fa-solid fa-sparkles fs-1 me-4"></i>
+                    <div>
+                        <h2 class="fw-bold mb-1">AI Talent Matcher</h2>
+                        <p class="mb-0 opacity-75">Finding the top 10 candidates for <strong>{{ job.title }}</strong> at <strong>{{ job.company }}</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if candidates %}
+                <div class="row g-4">
+                    {% for student in candidates %}
+                        <div class="col-md-12">
+                            <div class="card border-0 shadow-sm rounded-4 p-3 hover-lift">
+                                <div class="row align-items-center">
+                                    <div class="col-md-1 text-center">
+                                        <div class="badge bg-primary fs-5 py-2 px-3 rounded-circle">{{ forloop.counter }}</div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <h5 class="fw-bold mb-1">{{ student.name }}</h5>
+                                        <p class="text-muted small mb-0"><i class="fa-solid fa-graduation-cap me-1"></i>{{ student.get_branch_display }} | CGPA: {{ student.cgpa }}</p>
+                                        <p class="text-muted small mb-0"><i class="fa-solid fa-code me-1"></i>Skills: {{ student.skills }}</p>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        <div class="ai-score-ring d-inline-block">
+                                            <h4 class="fw-bold text-success mb-0">{{ student.ai_score }}%</h4>
+                                            <div class="small text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">Match Score</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 text-end">
+                                        <a href="{% url 'students:student_profile_view_param' student.id %}" class="btn btn-outline-primary rounded-pill px-4">View Profile</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-face-frown fs-1 text-muted mb-3"></i>
+                    <h4 class="text-muted">No highly matched candidates found yet.</h4>
+                    <p class="text-muted">Students might need to update their skills to match this job's requirements: <strong>{{ job.required_skills }}</strong></p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+    }
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+    .ai-score-ring {
+        padding: 10px;
+        border: 3px solid #198754;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: #f8fff9;
+    }
+</style>
+{% endblock %}

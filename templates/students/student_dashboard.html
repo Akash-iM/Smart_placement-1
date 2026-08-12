@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ student.name }} Dashboard | SPC{% endblock %}
+
+{% block content %}
+<div class="py-3">
+    <h2>{{ student.name }} <small class="text-muted">({{ student.email }})</small></h2>
+    <div class="row g-3 mb-3">
+        <div class="col"><div class="card stats-card p-3 text-center h-100"><div class="card-body"><h5>Offer status</h5><p class="fs-4 fw-bold text-primary">{{ student.offer_status }}</p></div></div></div>
+        <div class="col"><div class="card stats-card p-3 text-center h-100"><div class="card-body"><h5>Sessions</h5><p class="fs-4 fw-bold text-dark">{{ student.session_count }}</p></div></div></div>
+        <div class="col"><div class="card stats-card p-3 text-center h-100"><div class="card-body"><h5>Average score</h5><p class="fs-4 fw-bold text-dark">{{ student.avg_score }}</p></div></div></div>
+        <div class="col"><div class="card stats-card p-3 text-center h-100"><div class="card-body"><h5>CGPA</h5><p class="fs-4 fw-bold text-dark">{{ student.cgpa }}</p></div></div></div>
+        <div class="col"><div class="card stats-card p-3 text-center h-100" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);"><div class="card-body"><h5 class="text-primary"><i class="fa-solid fa-microchip me-1"></i> ML Predictor</h5><p class="fs-4 fw-bold" style="color: #4f46e5;">{{ placement_prob }}%</p></div></div></div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">Mock Interview Sessions</div>
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead><tr><th>ID</th><th>Questions</th><th>Avg score</th><th>Updated</th></tr></thead>
+                <tbody>
+                {% for s in sessions %}
+                    <tr>
+                        <td>{{ s.id }}</td>
+                        <td>{{ s.questions }}</td>
+                        <td>{% if s.avg_score %}{{ s.avg_score }}{% else %}-{% endif %}</td>
+                        <td>{{ s.updated_at|date:'SHORT_DATETIME_FORMAT' }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4">No mock sessions yet.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

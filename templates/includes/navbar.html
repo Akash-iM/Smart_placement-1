@@ -1,0 +1,80 @@
+<nav class="navbar navbar-expand w-100 navbar-light bg-white topbar mb-4 static-top shadow-sm px-4 d-flex justify-content-between">
+    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle me-3">
+        <i class="fa fa-bars text-primary"></i>
+    </button>
+    <form class="d-none d-sm-inline-block form-inline me-auto ms-md-3 my-2 my-md-0 mw-100 navbar-search">
+        <div class="input-group">
+            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for reports, users, or metrics..." aria-label="Search" style="border-radius: 20px 0 0 20px; padding: 0.6rem 1.2rem;">
+            <button class="btn btn-primary" type="button" style="border-radius: 0 20px 20px 0; padding: 0.6rem 1.2rem;">
+                <i class="fas fa-search fa-sm"></i>
+            </button>
+        </div>
+    </form>
+    <ul class="navbar-nav ms-auto align-items-center">
+        <!-- Alerts Dropdown -->
+        <li class="nav-item dropdown no-arrow mx-1">
+            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-bell fa-fw text-gray-400"></i>
+                {% if request.user.is_authenticated and request.user.profile.unread_notifications_count > 0 %}
+                <span class="position-absolute top-25 start-75 translate-middle badge rounded-pill bg-danger shadow-sm" style="font-size: 0.5rem; margin-top: 10px;">{{ request.user.profile.unread_notifications_count }}</span>
+                {% endif %}
+            </a>
+            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in border-0 rounded-3 mt-2" aria-labelledby="alertsDropdown" style="width: 300px;">
+                <h6 class="dropdown-header bg-primary text-white fw-bold p-3" style="border-radius: 0.5rem 0.5rem 0 0;">
+                    Alerts Center
+                </h6>
+                {% if request.user.is_authenticated %}
+                    {% for notification in request.user.notifications.all|slice:":4" %}
+                    <a class="dropdown-item d-flex align-items-center py-3 border-bottom {% if not notification.is_read %}bg-light border-start border-4 border-primary{% endif %}" href="{{ notification.link }}">
+                        <div class="me-3">
+                            <div class="icon-circle bg-primary-subtle text-primary rounded-circle p-2 d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                        </div>
+                        <div style="white-space: normal;">
+                            <div class="small text-muted">{{ notification.created_at|date:"M d, Y" }}</div>
+                            <span class="small {% if not notification.is_read %}fw-bold text-dark{% else %}text-muted{% endif %}">{{ notification.message }}</span>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <a class="dropdown-item text-center small text-muted py-3" href="#">No new alerts.</a>
+                    {% endfor %}
+                {% endif %}
+                <a class="dropdown-item text-center small text-primary fw-bold py-3 text-uppercase" href="#">Show All Alerts</a>
+            </div>
+        </li>
+        <div class="topbar-divider d-none d-sm-block mx-3 border-end" style="height: 2rem;"></div>
+        <!-- User Information -->
+        <li class="nav-item dropdown no-arrow d-flex align-items-center">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                <span class="me-3 d-none d-lg-inline text-gray-600 small fw-bold">{{ user.username|default:"Active User" }}</span>
+                <img class="img-profile rounded-circle shadow-sm border" src="https://ui-avatars.com/api/?name={{ user.username|default:'Active+User' }}&background=4e73df&color=fff&bold=true" style="width: 2.5rem; height: 2.5rem;">
+            </a>
+            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in border-0 rounded-3 mt-2" aria-labelledby="userDropdown">
+                {% if request.user.profile.role == 'student' %}
+                <a class="dropdown-item py-2" href="{% url 'students:student_profile_view' %}">
+                    <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i> Digital Portfolio
+                </a>
+                <a class="dropdown-item py-2" href="{% url 'students:student_profile_update' %}">
+                    <i class="fas fa-cogs fa-sm fa-fw me-2 text-gray-400"></i> Edit Profile
+                </a>
+                {% elif request.user.profile.role == 'recruiter' %}
+                <a class="dropdown-item py-2" href="{% url 'recruiter_dashboard' %}">
+                    <i class="fas fa-building fa-sm fa-fw me-2 text-gray-400"></i> Recruiter Dashboard
+                </a>
+                <a class="dropdown-item py-2" href="{% url 'students:add_job' %}">
+                    <i class="fas fa-plus fa-sm fa-fw me-2 text-gray-400"></i> Post Job
+                </a>
+                {% else %}
+                <a class="dropdown-item py-2" href="{% url 'students:all_students_list' %}">
+                    <i class="fas fa-users fa-sm fa-fw me-2 text-gray-400"></i> Student Directory
+                </a>
+                {% endif %}
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item py-2 text-danger fw-bold" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt fa-sm fa-fw me-2"></i> Logout
+                </a>
+            </div>
+        </li>
+    </ul>
+</nav>

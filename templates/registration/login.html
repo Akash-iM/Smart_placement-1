@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - SPC{% endblock %}
+
+{% block content %}
+<style>
+    .login-wrapper {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+
+    .login-container {
+        display: flex;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        overflow: hidden;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    body[data-theme='dark'] .login-container {
+        background: rgba(30, 30, 35, 0.8);
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-left {
+        flex: 1;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-left::before {
+        content: '';
+        position: absolute;
+        width: 150%;
+        height: 150%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        top: -25%;
+        left: -25%;
+        animation: pulse 8s infinite alternate;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+
+    .login-right {
+        flex: 1;
+        padding: 4rem 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-floating input {
+        border-radius: 12px;
+        border: 1px solid rgba(100, 100, 100, 0.2);
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    body[data-theme='dark'] .form-floating input {
+        background: rgba(0, 0, 0, 0.2);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .form-floating label {
+        color: #6c757d;
+    }
+
+    body[data-theme='dark'] .form-floating label {
+        color: #adb5bd;
+    }
+
+    .btn-login {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border: none;
+        padding: 0.8rem;
+        border-radius: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+        color: white;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .login-container {
+            flex-direction: column;
+        }
+        .login-left {
+            padding: 2rem;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-container">
+        <!-- Left Side: Welcome Panel -->
+        <div class="login-left">
+            <h2 class="display-5 fw-bold mb-3 position-relative z-1">Welcome Back.</h2>
+            <p class="fs-5 opacity-75 position-relative z-1 mb-4">Sign in to your Smart Placement Companion dashboard to unlock analytics, AI tools, and student insights.</p>
+            <div class="mt-auto position-relative z-1 d-none d-md-block">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fa-solid fa-circle-check text-success me-2"></i>
+                    <span>Secure Authentication</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fa-solid fa-circle-check text-success me-2"></i>
+                    <span>Role-based Access</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="fa-solid fa-circle-check text-success me-2"></i>
+                    <span>Enterprise Grade Security</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Side: Login Form -->
+        <div class="login-right">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-fingerprint fs-1 text-primary mb-3"></i>
+                <h3 class="fw-bold">Sign In</h3>
+                <p class="text-muted small">Enter your credentials to continue</p>
+            </div>
+            
+            {% if form.errors %}
+                <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-3 mb-4 text-danger small">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i> Invalid username or password. Please try again.
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="form-floating">
+                    <input type="text" name="username" class="form-control" id="id_username" placeholder="Username" required autofocus>
+                    <label for="id_username"><i class="fa-solid fa-user me-2"></i>Username</label>
+                </div>
+                
+                <div class="form-floating mb-4">
+                    <input type="password" name="password" class="form-control" id="id_password" placeholder="Password" required>
+                    <label for="id_password"><i class="fa-solid fa-lock me-2"></i>Password</label>
+                </div>
+                
+                <input type="hidden" name="next" value="{{ next }}" />
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-login btn-lg"><i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Log In</button>
+                </div>
+                
+                <!-- Password reset and Registration -->
+                <div class="text-center mt-4">
+                    <p class="mb-1 text-muted small">Don't have an account? <a href="{% url 'register' %}" class="fw-bold text-primary hover-primary text-decoration-none">Register here</a></p>
+                    <a href="#" class="text-decoration-none small text-muted hover-primary">Forgot your password?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

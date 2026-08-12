@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5 fade-in-up">
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto text-center">
+            <h2 class="display-5 fw-bold"><i class="bi bi-shield-lock-fill text-danger me-2"></i>Admin Dashboard</h2>
+            <p class="lead text-muted">Welcome back, {{ request.user.username }}!</p>
+            <span class="badge bg-danger fs-6 py-2 px-3 shadow-sm text-uppercase letter-spacing-1">Role: {{ request.user.profile.role|default:"admin" }}</span>
+        </div>
+    </div>
+    
+    <!-- Top KPI Cards -->
+    <div class="row g-4 justify-content-center mb-5">
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="text-secondary fw-bold">{{ total_users }}</h2>
+                <div class="text-muted small text-uppercase fw-bold">Total Users</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="text-success fw-bold">{{ total_placements }}</h2>
+                <div class="text-muted small text-uppercase fw-bold">Total Placements</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="text-primary fw-bold">{{ success_rate }}%</h2>
+                <div class="text-muted small text-uppercase fw-bold">Success Rate</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-5">
+            <div class="card h-100 shadow-sm border-0 rounded-4 text-center p-4">
+                <i class="bi bi-sliders text-secondary mt-3 mb-3" style="font-size: 3rem;"></i>
+                <h4 class="fw-bold">Django Admin Panel</h4>
+                <p class="text-muted">Manage user roles, platform data, and direct database queries.</p>
+                <a href="/admin/" target="_blank" class="btn btn-outline-danger rounded-pill mt-auto">Go To Admin Panel</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

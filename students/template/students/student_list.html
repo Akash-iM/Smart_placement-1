@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Students List</title>
+</head>
+<body>
+
+<h1>Student List</h1>
+
+<table border="1">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Branch</th>
+        <th>CGPA</th>
+    </tr>
+
+    {% for student in students %}
+    <tr>
+        <td>
+            <a href="{% url 'students:student_detail_dashboard' student.id %}">
+                {{ student.name }}
+            </a>
+        </td>
+        <td>{{ student.email }}</td>
+        <td>{{ student.branch }}</td>
+        <td>{{ student.cgpa }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+<br>
+
+<a href="/">Go Back Home</a>
+
+</body>
+</html>

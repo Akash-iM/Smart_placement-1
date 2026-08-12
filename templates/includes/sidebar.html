@@ -1,0 +1,78 @@
+<nav id="sidebar">
+    <a class="sidebar-brand d-flex align-items-center justify-content-center py-4 text-decoration-none text-white h5 mb-0" href="#">
+        <div class="sidebar-brand-icon rotate-n-15 me-2">
+            <i class="fas fa-graduation-cap fa-2x"></i>
+        </div>
+        <div class="sidebar-brand-text fw-bold" style="letter-spacing: 1px;">SPC Panel</div>
+    </a>
+    <hr class="sidebar-divider my-0 border-light opacity-25 mx-3">
+    
+    <div class="sidebar-heading text-uppercase text-white-50 small fw-bold px-4 py-3 mt-2" style="font-size: 0.75rem;">Core Apps</div>
+    
+    <ul class="nav flex-column w-100">
+        <li class="nav-item">
+            {% if request.user.is_authenticated %}
+                {% if request.user.profile.role == 'student' %}
+                    <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center sidebar-link-active hover-bg" href="{% url 'student_dashboard' %}">
+                {% elif request.user.profile.role == 'officer' %}
+                    <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center sidebar-link-active hover-bg" href="{% url 'officer_dashboard' %}">
+                {% elif request.user.profile.role == 'admin' %}
+                    <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center sidebar-link-active hover-bg" href="{% url 'admin_dashboard' %}">
+                {% else %}
+                    <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center sidebar-link-active hover-bg" href="{% url 'home' %}">
+                {% endif %}
+            {% else %}
+                <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center sidebar-link-active hover-bg" href="{% url 'login' %}">
+            {% endif %}
+                <i class="fas fa-fw fa-tachometer-alt me-3 opacity-75"></i> <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center hover-bg" href="{% url 'students:analytics_dashboard' %}">
+                <i class="fas fa-fw fa-chart-area me-3 opacity-75"></i> <span>Analytics</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center hover-bg" href="{% url 'students:student_list' %}">
+                <i class="fas fa-fw fa-users me-3 opacity-75"></i> <span>Students</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center hover-bg" href="{% url 'students:job_list' %}">
+                <i class="fas fa-fw fa-briefcase me-3 opacity-75"></i> <span>Jobs</span>
+            </a>
+        </li>
+        {% if request.user.is_authenticated and request.user.profile.role == 'student' %}
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center hover-bg" href="{% url 'students:my_applications' %}">
+                <i class="fas fa-fw fa-file-alt me-3 opacity-75"></i> <span>My Applications</span>
+            </a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center hover-bg" href="{% url 'students:mock_interview' %}">
+                <i class="fas fa-fw fa-comments me-3 opacity-75"></i> <span>Interviews</span>
+            </a>
+        </li>
+        
+        <hr class="sidebar-divider my-2 border-light opacity-25 mx-3">
+        <div class="sidebar-heading text-uppercase text-white-50 small fw-bold px-4 py-3" style="font-size: 0.75rem;">Intelligence</div>
+        
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center hover-bg" href="{% url 'students:chatbot' %}">
+                <i class="fas fa-fw fa-robot me-3 opacity-75"></i> <span>AI Coach</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 fw-semibold d-flex align-items-center hover-bg" href="{% url 'students:resume_analyzer' %}">
+                <i class="fas fa-fw fa-file-pdf me-3 opacity-75"></i> <span>Resume AI</span>
+            </a>
+        </li>
+    </ul>
+    
+    <style>
+        .hover-bg { transition: background 0.2s, padding-left 0.2s; opacity: 0.85; }
+        .hover-bg:hover { opacity: 1; background: rgba(255,255,255,0.1); padding-left: 2rem !important; }
+        .sidebar-link-active { opacity: 1 !important; background: rgba(255,255,255,0.15); border-left: 4px solid #fff; }
+    </style>
+</nav>

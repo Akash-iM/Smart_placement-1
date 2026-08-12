@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Mock Interview Bot{% endblock %}
+
+{% block content %}
+<div class="row fade-in-up delay-1 mb-5">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0 rounded-4 mb-4" style="background: rgba(255,255,255,0.95);">
+            <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-user-tie me-2 text-primary"></i>Mock Interview Coach</h3>
+                    <p class="text-muted mt-2 mb-0">Ask common interview questions and get coaching-style feedback immediately.</p>
+                </div>
+                <div>
+                    <button id="ttsToggle" class="btn btn-sm btn-outline-secondary rounded-pill fw-bold"><i class="fa-solid fa-volume-high me-1"></i>Voice Output: ON</button>
+                </div>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <div class="mb-3 mt-3 d-flex flex-wrap gap-2">
+                    {% if question_bank %}
+                    {% for q in question_bank %}
+                    <button class="btn btn-outline-primary btn-sm rounded-pill fw-bold" type="button" onclick="askFromBank({{ q.id }}, '{{ q.text|escapejs }}')">{{ q.text }}</button>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <div id="chatBox" class="border-0 rounded-4 p-4 mb-3" style="height: 400px; overflow-y: auto; background: #f8f9fa; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);"></div>
+                <form id="chatForm" class="d-flex position-relative mt-2">
+                    <button type="button" id="micBtn" class="btn btn-secondary rounded-circle shadow-sm position-absolute" style="left: 6px; top: 6px; width: 36px; height: 36px; padding: 0; z-index: 10;" title="Click to Speak"><i class="fa-solid fa-microphone" style="font-size: 0.9rem;"></i></button>
+                    <input id="userInput" type="text" class="form-control form-control-lg rounded-pill ps-5 pe-5 border-0 shadow-sm" style="background:#f1f3f5; font-size: 1rem;" placeholder="Type or speak your interview question..." autocomplete="off">
+                    <button type="submit" class="btn btn-primary rounded-circle shadow-sm position-absolute" style="right: 6px; top: 6px; width: 36px; height: 36px; padding: 0; z-index: 10;"><i class="fa-solid fa-paper-plane" style="font-size: 0.9rem;"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4" style="background: rgba(255,255,255,0.95);">
+            <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left me-2 text-info"></i>Recent Sessions</h5>
+            </div>
+            <div class="card-body px-0 pt-0">
+                <ul class="list-group list-group-flush border-top-0">
+                    {% for session in sessions %}
+                    <li class="list-group-item px-4 py-3 bg-transparent border-bottom border-light">
+                        <div class="fw-bold text-dark">{{ session }}</div>
+                        <small class="text-muted"><i class="fa-solid fa-circle-question me-1"></i>Questions: {{ session.question_count }}</small>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item px-4 py-3 bg-transparent text-muted"><i class="fa-solid fa-ghost me-2"></i>No sessions yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chatBox');
+    const chatForm = document.getElementById('chatForm');
+    const userInput = document.getElementById('userInput');
+    let currentSessionId = null;
+
+    function appendBubble(sender, text, score=null) {
+        const bubble = document.createElement('div');
+        bubble.className = sender === 'bot' ? 'alert alert-secondary shadow-sm mb-3 position-relative' : 'alert alert-primary shadow-sm mb-3 ms-auto text-end position-relative';
+        bubble.style.borderRadius = '20px';
+        bubble.style.maxWidth = '85%';
+        bubble.style.border = 'none';
+        
+        if (sender === 'bot') {
+            bubble.style.borderBottomLeftRadius = '4px';
+            bubble.style.background = '#ffffff';
+            bubble.style.color = '#333';
+            let contentHtml = `<strong class="text-primary d-block mb-1"><i class="fa-solid fa-robot me-1"></i>COACH</strong> ${text}`;
+            if (score !== null && score !== undefined) {
+                let badgeClass = score >= 8 ? 'bg-success' : (score >= 5 ? 'bg-warning text-dark' : 'bg-danger');
+                contentHtml += `<div class="mt-2 pt-2 border-top"><span class="badge ${badgeClass} fs-6 px-3 py-2 shadow-sm"><i class="fa-solid fa-star me-2 text-warning"></i>Score: ${score}/10</span></div>`;
+            }
+            bubble.innerHTML = contentHtml;
+        } else {
+            bubble.style.borderBottomRightRadius = '4px';
+            bubble.style.background = 'linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)';
+            bubble.style.color = '#fff';
+            bubble.innerHTML = `<strong class="d-block mb-1 opacity-75"><i class="fa-solid fa-user me-1"></i>YOU</strong> ${text}`;
+        }
+        
+        chatBox.appendChild(bubble);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendQuestion(question, questionId = null) {
+        appendBubble('you', question);
+
+        const payload = { question };
+        if (currentSessionId) payload.session_id = currentSessionId;
+        if (questionId) payload.question_id = questionId;
+
+        const response = await fetch('{% url "students:mock_interview_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            appendBubble('bot', 'Server error: ' + response.status);
+            return;
+        }
+
+        const data = await response.json();
+        currentSessionId = data.session_id || currentSessionId;
+        
+        if (data.error) {
+            appendBubble('bot', data.error);
+        } else {
+            appendBubble('bot', data.answer || 'I could not generate an answer.', data.score);
+            speakText(data.answer);
+        }
+    }
+
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const question = userInput.value.trim();
+        if (!question) return;
+        userInput.value = '';
+        sendQuestion(question);
+    });
+
+    function askFromBank(questionId, questionText) {
+        userInput.value = questionText;
+        sendQuestion(questionText, questionId);
+    }
+
+    // Voice Input/Output Logic
+    let isRecording = false;
+    let recognition = null;
+    let synth = window.speechSynthesis;
+    let voiceOutputEnabled = true;
+
+    const ttsToggle = document.getElementById('ttsToggle');
+    ttsToggle.addEventListener('click', function() {
+        voiceOutputEnabled = !voiceOutputEnabled;
+        if (voiceOutputEnabled) {
+            this.innerHTML = '<i class="fa-solid fa-volume-high me-1"></i>Voice Output: ON';
+            this.classList.replace('btn-secondary', 'btn-outline-secondary');
+        } else {
+            this.innerHTML = '<i class="fa-solid fa-volume-xmark me-1"></i>Voice Output: OFF';
+            this.classList.replace('btn-outline-secondary', 'btn-secondary');
+            if (synth) synth.cancel();
+        }
+    });
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            userInput.value = transcript;
+            chatForm.dispatchEvent(new Event('submit'));
+        };
+        
+        recognition.onend = function() {
+            isRecording = false;
+            document.getElementById('micBtn').innerHTML = '<i class="fa-solid fa-microphone"></i>';
+            document.getElementById('micBtn').classList.replace('btn-danger', 'btn-secondary');
+        };
+    } else {
+        document.getElementById('micBtn').style.display = 'none';
+    }
+
+    document.getElementById('micBtn').addEventListener('click', function() {
+        if (!recognition) return;
+        if (isRecording) {
+            recognition.stop();
+        } else {
+            recognition.start();
+            isRecording = true;
+            this.innerHTML = '<i class="fa-solid fa-stop"></i>';
+            this.classList.replace('btn-secondary', 'btn-danger');
+        }
+    });
+
+    function speakText(text) {
+        if (!voiceOutputEnabled || !synth || !text) return;
+        synth.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.05;
+        synth.speak(utterance);
+    }
+
+    appendBubble('bot', 'Welcome to the interview bot. Ask me anything about interview preparation.');
+    speakText('Welcome to the interview bot. Ask me anything about interview preparation.');
+    </script>
+{% endblock %}

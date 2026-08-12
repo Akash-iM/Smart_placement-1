@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Officer Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5 fade-in-up">
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto text-center">
+            <h2 class="display-5 fw-bold"><i class="bi bi-briefcase-fill text-success me-2"></i>Officer Dashboard</h2>
+            <p class="lead text-muted">Welcome back, {{ request.user.username }}!</p>
+            <span class="badge bg-success fs-6 py-2 px-3 shadow-sm text-uppercase letter-spacing-1">Role: {{ request.user.profile.role }}</span>
+        </div>
+    </div>
+    
+    <!-- Top KPI Cards -->
+    <div class="row g-4 justify-content-center mb-5">
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="text-success fw-bold">{{ total_students }}</h2>
+                <div class="text-muted small text-uppercase fw-bold">Total Students</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="text-primary fw-bold">{{ total_applications }}</h2>
+                <div class="text-muted small text-uppercase fw-bold">Total Applications</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="text-info fw-bold">{{ total_jobs }}</h2>
+                <div class="text-muted small text-uppercase fw-bold">Active Jobs</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="text-warning fw-bold">{{ selected_candidates }}</h2>
+                <div class="text-muted small text-uppercase fw-bold">Selected</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 text-center p-4">
+                <i class="bi bi-people text-secondary mt-3 mb-3" style="font-size: 3rem;"></i>
+                <h4 class="fw-bold">Student Roster</h4>
+                <p class="text-muted">View all registered students and their details.</p>
+                <a href="{% url 'students:student_list' %}" class="btn btn-outline-success rounded-pill mt-auto">View Students</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 text-center p-4">
+                <i class="bi bi-bar-chart-fill text-secondary mt-3 mb-3" style="font-size: 3rem;"></i>
+                <h4 class="fw-bold">Analytics</h4>
+                <p class="text-muted">Review placement statistics and CGPA spread.</p>
+                <a href="{% url 'students:analytics_dashboard' %}" class="btn btn-outline-success rounded-pill mt-auto">View Stats</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 text-center p-4">
+                <i class="bi bi-file-earmark-pdf text-danger mt-3 mb-3" style="font-size: 3rem;"></i>
+                <h4 class="fw-bold">Resume Analyzer</h4>
+                <p class="text-muted">Grade and analyze student resumes instantly using AI.</p>
+                <a href="{% url 'students:resume_analyzer' %}" class="btn btn-outline-danger rounded-pill mt-auto">Run Analysis</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Students Table -->
+    {% if top_students %}
+    <div class="row mt-5 mb-5 fade-in-up" style="animation-delay: 0.3s;">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <h5 class="fw-bold text-dark"><i class="fas fa-trophy text-warning me-2"></i>Top Ranking Students</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 rounded-start">Student Name</th>
+                                    <th class="border-0">Branch</th>
+                                    <th class="border-0 text-center">CGPA</th>
+                                    <th class="border-0 text-center">Status</th>
+                                    <th class="border-0 rounded-end text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in top_students %}
+                                <tr>
+                                    <td class="fw-bold text-dark">
+                                        {{ s.name }}
+                                    </td>
+                                    <td class="text-muted">{{ s.get_branch_display }}</td>
+                                    <td class="text-center"><span class="badge bg-warning text-dark shadow-sm px-3 py-2"><i class="fas fa-star me-1"></i>{{ s.cgpa }}</span></td>
+                                    <td class="text-center">
+                                        {% if s.placement_status == 'Placed' %}
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle py-2">Placed</span>
+                                        {% else %}
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-2">Unplaced</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'students:student_profile_view_param' s.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">View Profile</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

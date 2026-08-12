@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Student{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Delete Student</h1>
+        <a class="btn btn-secondary" href="{% url 'students:student_list' %}">Cancel</a>
+    </div>
+    <div class="card border-danger">
+        <div class="card-body">
+            <p>Are you sure you want to delete "<strong>{{ student.name }}</strong>"?</p>
+            <form method="post">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit">Confirm Delete</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

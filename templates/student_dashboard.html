@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4 fade-in">
+    <h1 class="h3 mb-0 text-gray-800 fw-bold">Student Dashboard</h1>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm rounded-pill px-3"><i class="fas fa-download fa-sm text-white-50 me-1"></i> Generate Resume PDF</a>
+</div>
+
+<div class="row mb-5">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 border-start border-primary border-5 shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">Current CGPA</div>
+                        <div class="h4 mb-0 fw-bold text-gray-800">8.75</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-graduation-cap fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 border-start border-success border-5 shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs fw-bold text-success text-uppercase mb-1">Applied Jobs</div>
+                        <div class="h4 mb-0 fw-bold text-gray-800">12</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-briefcase fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 border-start border-info border-5 shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs fw-bold text-info text-uppercase mb-1">Interview Score</div>
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-auto"><div class="h4 mb-0 me-3 fw-bold text-gray-800">85%</div></div>
+                            <div class="col"><div class="progress progress-sm me-2 rounded-pill"><div class="progress-bar bg-info" role="progressbar" style="width: 85%"></div></div></div>
+                        </div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-clipboard-check fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 border-start border-warning border-5 shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">Skill Badges</div>
+                        <div class="h4 mb-0 fw-bold text-gray-800">4 Mastered</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-medal fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header py-3 bg-white d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 fw-bold text-primary"><i class="fas fa-chart-line me-2"></i>Performance Analytics</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area" style="height: 300px; position:relative;"><canvas id="performanceChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 fw-bold text-primary"><i class="fas fa-code me-2"></i>Top Skills Mastery</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="small fw-bold">Python <span class="float-end text-success">90%</span></h4>
+                    <div class="progress rounded-pill" style="height: 8px;"><div class="progress-bar bg-success" role="progressbar" style="width: 90%"></div></div>
+                </div>
+                <div class="mb-4">
+                    <h4 class="small fw-bold">Django <span class="float-end text-primary">80%</span></h4>
+                    <div class="progress rounded-pill" style="height: 8px;"><div class="progress-bar bg-primary" role="progressbar" style="width: 80%"></div></div>
+                </div>
+                <div class="mb-4">
+                    <h4 class="small fw-bold">Machine Learning <span class="float-end text-warning">60%</span></h4>
+                    <div class="progress rounded-pill" style="height: 8px;"><div class="progress-bar bg-warning" role="progressbar" style="width: 60%"></div></div>
+                </div>
+                <div class="mb-4">
+                    <h4 class="small fw-bold">React JS <span class="float-end text-info">40%</span></h4>
+                    <div class="progress rounded-pill" style="height: 8px;"><div class="progress-bar bg-info" role="progressbar" style="width: 40%"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .fade-in { animation: fadeIn 0.8s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    var ctx = document.getElementById("performanceChart");
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [{
+                label: "Interview Score",
+                lineTension: 0.4,
+                backgroundColor: "rgba(78, 115, 223, 0.1)",
+                borderColor: "rgba(78, 115, 223, 1)",
+                pointRadius: 4,
+                pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                pointBorderColor: "#fff",
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: "#fff",
+                pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                pointBorderWidth: 2,
+                data: [50, 60, 55, 75, 80, 85],
+                fill: true,
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { min: 0, max: 100, grid: { borderDash: [4], color: "#eaecf4" } }
+            }
+        }
+    });
+</script>
+{% endblock %}

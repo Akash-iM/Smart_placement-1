@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Registration - SPC{% endblock %}
+
+{% block content %}
+<style>
+    .login-wrapper { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem 0; }
+    .login-container { display: flex; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); border: 1px solid rgba(255, 255, 255, 0.4); overflow: hidden; width: 100%; max-width: 1000px; }
+    body[data-theme='dark'] .login-container { background: rgba(30, 30, 35, 0.8); border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
+    .login-left { flex: 1; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 3rem; display: flex; flex-direction: column; justify-content: center; color: white; position: relative; overflow: hidden; }
+    .login-left::before { content: ''; position: absolute; width: 150%; height: 150%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); top: -25%; left: -25%; animation: pulse 8s infinite alternate; }
+    @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+    .login-right { flex: 1; padding: 4rem 3rem; display: flex; flex-direction: column; justify-content: center; }
+    body[data-theme='dark'] p { color: #ccc; }
+    
+    .btn-login { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border: none; padding: 0.8rem; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; color: white; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3); }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4); color: white; }
+    
+    @media (max-width: 768px) { .login-container { flex-direction: column; } .login-left { padding: 2rem; text-align: center; } }
+    
+    /* Auto styling for Registration form fields */
+    .register-form p { margin-bottom: 1.2rem; }
+    .register-form label { display:block; font-weight: 600; font-size: 0.85rem; color: #6c757d; margin-bottom: 0.4rem; text-transform: uppercase; }
+    body[data-theme='dark'] .register-form label { color: #adb5bd; }
+    .register-form input { border-radius: 12px; border: 1px solid rgba(100, 100, 100, 0.2); background: rgba(255, 255, 255, 0.5); padding: 0.75rem 1rem; width: 100%; }
+    body[data-theme='dark'] .register-form input { background: rgba(0, 0, 0, 0.2) !important; color: white; border-color: rgba(255, 255, 255, 0.1); }
+    .helptext { font-size: 0.75rem; color: #888; display: block; margin-top: 0.4rem; }
+    .errorlist { color: #dc3545; font-size: 0.8rem; list-style-type: none; padding-left: 0; margin-bottom: 0.4rem; }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-container fade-in-up delay-1">
+        <div class="login-left">
+            <h2 class="display-5 fw-bold mb-3 position-relative z-1">Join as Student.</h2>
+            <p class="fs-5 opacity-75 position-relative z-1 mb-4">Register as a student to participate in mock interviews and receive placement coaching.</p>
+        </div>
+        <div class="login-right">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-user-graduate fs-1 text-primary mb-3"></i>
+                <h3 class="fw-bold text-dark">Student Registration</h3>
+                <p class="text-muted small">Fill out the form below to register</p>
+            </div>
+            
+            <form method="post" action="{% url 'student_register' %}" class="register-form mt-2">
+                {% csrf_token %}
+                {{ form.as_p|safe }}
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-login btn-lg"><i class="fa-solid fa-user-check me-2"></i>Sign Up</button>
+                </div>
+                <div class="text-center mt-4">
+                    <p class="mb-1 text-muted small">Already have an account? <a href="{% url 'login' %}" class="fw-bold text-primary hover-primary text-decoration-none">Login here</a></p>
+                    <p class="mb-1 text-muted small">Are you an officer? <a href="{% url 'officer_register' %}" class="fw-bold text-success hover-success text-decoration-none">Officer Registration</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

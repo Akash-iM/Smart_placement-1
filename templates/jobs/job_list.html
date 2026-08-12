@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}Job Board{% endblock %}
+
+{% block content %}
+<div class="container fade-in-up mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-briefcase text-primary me-2"></i>Job Opportunities</h2>
+        {% if request.user.profile.role in 'admin,officer' %}
+            <a href="{% url 'students:add_job' %}" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="fas fa-plus me-2"></i>Post New Job</a>
+        {% endif %}
+    </div>
+
+    <!-- Search / Filter Bar -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4 p-3 bg-white">
+        <form method="GET" action="{% url 'students:job_list' %}" class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0 rounded-start-pill"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" name="q" class="form-control bg-light border-0 rounded-end-pill py-2" placeholder="Search by job title or company..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <input type="number" step="0.01" name="cgpa" class="form-control bg-light border-0 rounded-pill py-2" placeholder="Max required CGPA" value="{{ request.GET.cgpa }}">
+            </div>
+            <div class="col-md-3">
+                <input type="text" name="skill" class="form-control bg-light border-0 rounded-pill py-2" placeholder="Filter by skill" value="{{ request.GET.skill }}">
+            </div>
+            <div class="col-md-1 d-grid">
+                <button type="submit" class="btn btn-secondary rounded-pill shadow-sm py-2"><i class="fas fa-filter"></i></button>
+            </div>
+        </form>
+    </div>
+
+    <!-- AI Recommended Jobs Section -->
+    {% if recommended_jobs %}
+    <div class="mb-5 fade-in-up" style="animation-delay: 0.1s;">
+        <h4 class="fw-bold mb-3"><i class="fas fa-magic text-warning me-2"></i>AI Top Matches</h4>
+        <div class="row g-4">
+            {% for job in recommended_jobs %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-warning shadow-sm rounded-4 position-relative hover-lift" style="border-width: 2px;">
+                    <div class="position-absolute top-0 end-0 translate-middle-y me-3">
+                        <span class="badge bg-warning text-dark fw-bold px-3 py-2 shadow-sm rounded-pill"><i class="fas fa-bolt text-danger me-1"></i>{{ job.match_score }}% Match</span>
+                    </div>
+                    <div class="card-body p-4 pt-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2 mt-2">
+                            <h5 class="fw-bold mb-0 text-dark">{{ job.title }}</h5>
+                        </div>
+                        <h6 class="text-muted mb-3"><i class="fas fa-building me-1"></i>{{ job.company }}</h6>
+                        
+                        <div class="mt-3 mb-3">
+                            <span class="badge bg-warning-subtle text-dark me-2 px-2 py-1"><i class="fas fa-graduation-cap me-1"></i>Min CGPA: {{ job.required_cgpa }}</span>
+                        </div>
+                        
+                        <p class="text-muted small text-truncate" style="max-height: 40px;">{{ job.description }}</p>
+                        
+                        <hr class="opacity-10">
+                        <div class="d-grid mt-3">
+                            <a href="{% url 'students:job_detail' job.id %}" class="btn btn-warning rounded-pill px-3 fw-bold text-dark shadow-sm">Review Match</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- New Jobs Section -->
+    {% if new_jobs %}
+    <div class="mb-5 fade-in-up" style="animation-delay: 0.2s;">
+        <h4 class="fw-bold mb-3 text-danger"><i class="fas fa-fire me-2"></i>Newly Added Jobs</h4>
+        <div class="row g-4">
+            {% for job in new_jobs %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-danger shadow-sm rounded-4 position-relative hover-lift" style="border-width: 2px;">
+                    <div class="position-absolute top-0 start-100 translate-middle z-1">
+                        <span class="badge bg-danger rounded-pill shadow" style="font-size: 0.75rem; padding: 0.5em 0.8em; transform: translateX(-90%); border: 2px solid white;">NEW</span>
+                    </div>
+                    <div class="card-body p-4 pt-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold mb-0 text-dark">{{ job.title }}</h5>
+                            <span class="badge bg-light text-primary border border-primary-subtle rounded-pill">{{ job.location|default:"Remote" }}</span>
+                        </div>
+                        <h6 class="text-muted mb-3"><i class="fas fa-building me-1"></i>{{ job.company }}</h6>
+                        
+                        <div class="mt-3 mb-3">
+                            <span class="badge bg-danger-subtle text-danger me-2 px-2 py-1"><i class="fas fa-graduation-cap me-1"></i>Min CGPA: {{ job.required_cgpa }}</span>
+                            {% if job.salary %}
+                            <span class="badge bg-success-subtle text-success px-2 py-1"><i class="fas fa-rupee-sign me-1"></i>{{ job.salary }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <p class="text-muted small text-truncate" style="max-height: 40px;">{{ job.description }}</p>
+                        
+                        <hr class="opacity-10">
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="small fw-semibold text-muted">
+                                <i class="far fa-clock me-1"></i>Deadline: {{ job.deadline|date:"M d, Y" }}
+                            </div>
+                            <a href="{% url 'students:job_detail' job.id %}" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">View Roles</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <h4 class="fw-bold mb-3 text-secondary mt-5">All Opportunities</h4>
+    <!-- Job Cards -->
+    <div class="row g-4">
+        {% for job in jobs %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 position-relative hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h4 class="fw-bold mb-0 text-dark">{{ job.title }}</h4>
+                        <span class="badge bg-light text-primary border border-primary-subtle rounded-pill">{{ job.location|default:"Remote" }}</span>
+                    </div>
+                    <h6 class="text-muted mb-3"><i class="fas fa-building me-1"></i>{{ job.company }}</h6>
+                    
+                    <div class="mt-4 mb-3">
+                        <span class="badge bg-secondary-subtle text-secondary me-2 px-2 py-1"><i class="fas fa-graduation-cap me-1"></i>Min CGPA: {{ job.required_cgpa }}</span>
+                        {% if job.salary %}
+                        <span class="badge bg-success-subtle text-success px-2 py-1"><i class="fas fa-rupee-sign me-1"></i>{{ job.salary }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="text-muted small text-truncate" style="max-height: 40px;">{{ job.description }}</p>
+                    
+                    <hr class="opacity-10">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="small fw-semibold {% if job.deadline|date:'Y-m-d' < today %}text-danger{% else %}text-muted{% endif %}">
+                            <i class="far fa-clock me-1"></i>Deadline: {{ job.deadline|date:"M d, Y" }}
+                        </div>
+                        <a href="{% url 'students:job_detail' job.id %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3 opacity-50"></i>
+            <h4 class="text-muted">No jobs found matching your criteria.</h4>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<style>
+.hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important; }
+</style>
+{% endblock %}

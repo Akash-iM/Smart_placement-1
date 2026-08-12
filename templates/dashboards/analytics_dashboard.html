@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% block title %}Advanced Analytics - SPC{% endblock %}
+
+{% block content %}
+<div class="container mb-5 fade-in-up">
+    <div class="row mb-5 text-center pt-4">
+        <h2 class="fw-bold"><i class="fa-solid fa-chart-pie text-primary me-2"></i>Advanced Analytics Dashboard</h2>
+        <p class="text-muted">High-level placement and performance metrics</p>
+    </div>
+    
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center h-100">
+                <h1 class="text-primary fw-bold display-5 mb-0">{{ total_students }}</h1>
+                <div class="text-muted small text-uppercase fw-bold mt-2">Active Students</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center h-100">
+                <h1 class="text-success fw-bold display-5 mb-0">{{ offer_rate }}<span class="fs-4">%</span></h1>
+                <div class="text-muted small text-uppercase fw-bold mt-2">Placed (Last {{ offer_window }} Days)</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center h-100">
+                <h1 class="text-info fw-bold display-5 mb-0">{{ total_sessions }}</h1>
+                <div class="text-muted small text-uppercase fw-bold mt-2">Mock Interviews</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center h-100">
+                <h1 class="text-warning fw-bold display-5 mb-0">{{ total_questions }}</h1>
+                <div class="text-muted small text-uppercase fw-bold mt-2">Q-Bank Size</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-chart-pie me-2"></i>Distribution by Branch</h5>
+                </div>
+                <div class="card-body px-4 pb-4" style="position: relative; height:300px;">
+                    <canvas id="branchChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-chart-area me-2"></i>CGPA Performance Curve</h5>
+                </div>
+                <div class="card-body px-4 pb-4" style="position: relative; height:300px;">
+                    <canvas id="cgpaChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Placement Analytics section -->
+    <div class="row g-4 mt-2 text-start">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-graduation-cap me-2 text-success"></i>Placements by Branch</h5>
+                </div>
+                <div class="card-body px-4 pb-4" style="position: relative; height:300px;">
+                    <canvas id="placementsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-briefcase me-2 text-primary"></i>Application Status Overview</h5>
+                </div>
+                <div class="card-body px-4 pb-4" style="position: relative; height:300px;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills section -->
+    <div class="row g-4 mt-1">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0 rounded-4 p-4">
+                <h5 class="fw-bold mb-4 text-dark"><i class="fa-solid fa-fire me-2 text-danger"></i>Top Technical Skills in Demand</h5>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for item in top_skills %}
+                        <span class="badge bg-primary fs-6 px-3 py-2 shadow-sm" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%) !important;">
+                            <i class="fa-solid fa-code me-2 text-white-50"></i>{{ item.skill|title }} 
+                            <span class="badge bg-light text-primary ms-1 rounded-pill">{{ item.count }}</span>
+                        </span>
+                    {% empty %}
+                        <span class="text-muted"><i class="fa-solid fa-ghost me-2"></i>No skills mapped yet.</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Send backend dicts to JS explicitly -->
+{{ branch_stats|json_script:"branch-data" }}
+{{ cgpa_bins|json_script:"cgpa-data" }}
+{{ placements_by_branch|json_script:"placements-data" }}
+{{ application_stats|json_script:"status-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const branchDataList = JSON.parse(document.getElementById('branch-data').textContent);
+        const cgpaBins = JSON.parse(document.getElementById('cgpa-data').textContent);
+        
+        // Render Branch Doughnut Chart
+        const branchLabels = branchDataList.map(b => b.branch);
+        const branchCounts = branchDataList.map(b => b.count);
+        
+        const branchCtx = document.getElementById('branchChart').getContext('2d');
+        new Chart(branchCtx, {
+            type: 'doughnut',
+            data: {
+                labels: branchLabels,
+                datasets: [{
+                    data: branchCounts,
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: {font: {family: "'Inter', sans-serif", size: 13}} }
+                },
+                cutout: '75%'
+            }
+        });
+
+        // Render CGPA Bar Graph
+        const cgpaLabels = ['0-5', '5-6', '6-7', '7-8', '8-9', '9-10'];
+        const cgpaData = cgpaLabels.map(label => cgpaBins[label] || 0);
+
+        const cgpaCtx = document.getElementById('cgpaChart').getContext('2d');
+        new Chart(cgpaCtx, {
+            type: 'bar',
+            data: {
+                labels: cgpaLabels,
+                datasets: [{
+                    label: 'Students Count',
+                    data: cgpaData,
+                    backgroundColor: 'rgba(78, 115, 223, 0.85)',
+                    hoverBackgroundColor: '#2e59d9',
+                    borderRadius: 6,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, font: {family: "'Inter', sans-serif"} },
+                        grid: { borderDash: [2, 4], color: '#eaecf4', drawBorder: false }
+                    },
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { font: {family: "'Inter', sans-serif"} }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Render Placements by Branch Chart
+        const placementsDataList = JSON.parse(document.getElementById('placements-data').textContent);
+        const placementLabels = placementsDataList.map(p => p.branch);
+        const placementCounts = placementsDataList.map(p => p.count);
+        
+        const placementCtx = document.getElementById('placementsChart').getContext('2d');
+        new Chart(placementCtx, {
+            type: 'bar',
+            data: {
+                labels: placementLabels,
+                datasets: [{
+                    label: 'Students Placed',
+                    data: placementCounts,
+                    backgroundColor: 'rgba(28, 200, 138, 0.85)',
+                    hoverBackgroundColor: '#17a673',
+                    borderRadius: 6,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, font: {family: "'Inter', sans-serif"} },
+                        grid: { borderDash: [2, 4], color: '#eaecf4', drawBorder: false }
+                    },
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { font: {family: "'Inter', sans-serif"} }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Render Application Status Doughnut Chart
+        const statusDataList = JSON.parse(document.getElementById('status-data').textContent);
+        const statusLabels = statusDataList.map(s => s.status);
+        const statusCounts = statusDataList.map(s => s.count);
+        
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusCounts,
+                    backgroundColor: ['#4e73df', '#1cc88a', '#e74a3b', '#f6c23e', '#36b9cc'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: {font: {family: "'Inter', sans-serif", size: 13}} }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

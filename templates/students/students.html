@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="py-2">
+    <!-- Top Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 border-start border-primary border-4 rounded-3 h-100">
+                <div class="card-body py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="text-primary me-3"><i class="bi bi-people-fill" style="font-size: 2.5rem;"></i></div>
+                        <div>
+                            <h6 class="text-muted text-uppercase fw-bold mb-1">Total Students</h6>
+                            <h2 class="mb-0 fw-bold text-dark">{{ total_students|default:0 }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 border-start border-success border-4 rounded-3 h-100">
+                <div class="card-body py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="text-success me-3"><i class="bi bi-trophy-fill" style="font-size: 2.5rem;"></i></div>
+                        <div>
+                            <h6 class="text-muted text-uppercase fw-bold mb-1">Top CGPA</h6>
+                            <h2 class="mb-0 fw-bold text-dark">{{ top_cgpa|default:"0.0" }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Student List Card -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-list-task me-2"></i>Student Roster</h5>
+            <a class="btn btn-primary shadow-sm" href="{% url 'students:add_student' %}"><i class="bi bi-person-plus-fill me-2"></i>Add Student</a>
+        </div>
+        <div class="card-body">
+            <form class="mb-4" onsubmit="return false;">
+                <div class="input-group input-group-lg shadow-sm">
+                    <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-search"></i></span>
+                    <input class="form-control border-start-0 ps-0" type="text" id="frontendSearchInput" value="{{ q }}" placeholder="Search students by name, email, or course...">
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Course</th>
+                            <th>Branch</th>
+                            <th>CGPA</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                    {% for student in students %}
+                        <tr style="transition: background-color 0.2s;">
+                            <td class="fw-semibold text-dark">{{ student.name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td><span class="badge bg-secondary">{{ student.course }}</span></td>
+                            <td>{{ student.branch }}</td>
+                            <td class="fw-bold text-primary">{{ student.cgpa }}</td>
+                            <td>
+                                <a class="btn btn-sm btn-outline-info" href="{% url 'students:student_detail_dashboard' student.id %}" title="View Dashboard"><i class="bi bi-eye-fill"></i></a>
+                                <a class="btn btn-sm btn-outline-primary" href="{% url 'students:edit_student' student.id %}" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+                                <a class="btn btn-sm btn-outline-danger" href="{% url 'students:delete_student' student.id %}" title="Delete"><i class="bi bi-trash-fill"></i></a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="text-center py-4 text-muted">No students found.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if students.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?q={{ q }}&page={{ students.previous_page_number }}">Previous</a></li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                    {% endif %}
+
+                    <li class="page-item disabled"><span class="page-link text-dark fw-semibold">Page {{ students.number }} of {{ students.paginator.num_pages }}</span></li>
+
+                    {% if students.has_next %}
+                    <li class="page-item"><a class="page-link" href="?q={{ q }}&page={{ students.next_page_number }}">Next</a></li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('frontendSearchInput');
+        searchInput.addEventListener('keyup', function() {
+            const filter = searchInput.value.toLowerCase();
+            const rows = document.querySelectorAll('#studentsTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(filter)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        
+        if (searchInput.value) { searchInput.dispatchEvent(new Event('keyup')); }
+    });
+</script>
+{% endblock %}

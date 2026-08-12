@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}API Documentation{% endblock %}
+
+{% block content %}
+<h1>API Documentation</h1>
+<p>Use the Student REST API and Mock Interview API for integrations.</p>
+<ul>
+    <li><strong>GET</strong> /api/students/ - list students</li>
+    <li><strong>POST</strong> /api/students/ - create student</li>
+    <li><strong>GET</strong> /api/students/{id}/ - student detail</li>
+    <li><strong>PUT</strong> /api/students/{id}/ - update student</li>
+    <li><strong>DELETE</strong> /api/students/{id}/ - delete student</li>
+</ul>
+<ul>
+    <li><strong>GET</strong> /api/students/questions/ - list interview questions</li>
+    <li><strong>POST</strong> /api/students/questions/ - add question</li>
+    <li><strong>GET</strong> /api/students/questions/{id}/ - question detail</li>
+    <li><strong>PUT</strong> /api/students/questions/{id}/ - update question</li>
+    <li><strong>DELETE</strong> /api/students/questions/{id}/ - delete question</li>
+</ul>
+<ul>
+    <li><strong>GET</strong> /api/students/sessions/ - list sessions</li>
+    <li><strong>GET</strong> /api/students/sessions/{id}/ - session detail with messages</li>
+</ul>
+<p>Mock interview widget endpoint:</p>
+<pre>/students/mock-interview/api/</pre>
+<p>Then use JSON body: {"question": "...", "session_id": optional, "question_id": optional}.</p>
+{% endblock %}

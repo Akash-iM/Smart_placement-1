@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5 fade-in-up">
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto text-center">
+            <h2 class="display-5 fw-bold"><i class="bi bi-person-badge text-primary me-2"></i>Student Dashboard</h2>
+            <p class="lead text-muted">Welcome back, {{ request.user.username }}!</p>
+            <span class="badge bg-primary fs-6 py-2 px-3 shadow-sm text-uppercase letter-spacing-1">Role: {{ request.user.profile.role }}</span>
+            <span class="badge {% if placement_status == 'Placed' %}bg-success{% else %}bg-warning text-dark{% endif %} fs-6 py-2 px-3 ms-2 shadow-sm text-uppercase letter-spacing-1">Status: {{ placement_status }}</span>
+            
+            <div class="mt-4 mx-auto" style="max-width: 400px;">
+                <div class="d-flex justify-content-between small fw-bold text-muted mb-1">
+                    <span>Profile Completion</span>
+                    <span class="{% if completion_percentage == 100 %}text-success{% endif %}">{{ completion_percentage }}%</span>
+                </div>
+                <div class="progress rounded-pill shadow-sm" style="height: 12px; background-color: #e9ecef;">
+                    <div class="progress-bar {% if completion_percentage == 100 %}bg-success{% else %}bg-primary{% endif %} rounded-pill" role="progressbar" style="width: {{ completion_percentage }}%;"></div>
+                </div>
+                {% if completion_percentage < 100 %}
+                    <a href="{% url 'students:student_profile_update' %}" class="small fw-bold text-decoration-none mt-2 d-inline-block"><i class="fas fa-magic me-1"></i>Finish setting up your portfolio</a>
+                {% else %}
+                    <a href="{% url 'students:student_profile_view' %}" class="small fw-bold text-decoration-none mt-2 text-success d-inline-block"><i class="fas fa-check-circle me-1"></i>Profile fully optimized! View Portfolio</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top KPI Cards -->
+    <div class="row g-4 justify-content-center mb-5">
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="text-primary fw-bold">{{ total_jobs }}</h2>
+                <div class="text-muted small text-uppercase fw-bold">Available Jobs</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="text-info fw-bold">{{ jobs_applied }}</h2>
+                <div class="text-muted small text-uppercase fw-bold">Applications</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="text-success fw-bold">{{ avg_score }}/10</h2>
+                <div class="text-muted small text-uppercase fw-bold">AI Interview Avg</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white shadow-sm border-0 rounded-4 p-4 text-center">
+                <h2 class="fw-bold">{{ new_jobs_count }}</h2>
+                <div class="text-white-50 small text-uppercase fw-bold">New Jobs Alert</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 justify-content-center">
+        <!-- Dashboard options -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 text-center p-4">
+                <i class="bi bi-mic text-secondary mt-3 mb-3" style="font-size: 3rem;"></i>
+                <h4 class="fw-bold">Mock Interviews</h4>
+                <p class="text-muted">Practice your behavioral and technical questions with AI.</p>
+                <a href="{% url 'students:mock_interview' %}" class="btn btn-outline-primary rounded-pill mt-auto">Start Interview</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 text-center p-4">
+                <i class="bi bi-robot text-secondary mt-3 mb-3" style="font-size: 3rem;"></i>
+                <h4 class="fw-bold">AI Chatbot</h4>
+                <p class="text-muted">Get automated resume tips and placement guidance.</p>
+                <a href="{% url 'students:chatbot' %}" class="btn btn-outline-primary rounded-pill mt-auto">Chat Now</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 text-center p-4">
+                <i class="bi bi-file-earmark-pdf text-danger mt-3 mb-3" style="font-size: 3rem;"></i>
+                <h4 class="fw-bold">Resume Analyzer</h4>
+                <p class="text-muted">Get your resume graded strictly against ATS systems by AI.</p>
+                <a href="{% url 'students:resume_analyzer' %}" class="btn btn-outline-danger rounded-pill mt-auto">Analyze PDF</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Jobs Table section -->
+    {% if latest_jobs %}
+    <div class="row mt-5 mb-5 fade-in-up" style="animation-delay: 0.3s;">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <h5 class="fw-bold text-dark"><i class="fas fa-fire text-danger me-2"></i>Recently Added Opportunities</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 rounded-start">Role</th>
+                                    <th class="border-0">Company</th>
+                                    <th class="border-0 text-center">Min CGPA</th>
+                                    <th class="border-0">Deadline</th>
+                                    <th class="border-0 rounded-end text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in latest_jobs %}
+                                <tr>
+                                    <td class="fw-bold text-dark">
+                                        {{ job.title }}
+                                        <span class="badge bg-danger ms-2" style="font-size: 0.65rem;">NEW</span>
+                                    </td>
+                                    <td class="text-muted">{{ job.company }}</td>
+                                    <td class="text-center"><span class="badge bg-light text-dark shadow-sm">{{ job.required_cgpa }}</span></td>
+                                    <td class="text-muted small">{{ job.deadline|date:"M d, Y" }}</td>
+                                    <td class="text-end">
+                                        <a href="{% url 'students:job_detail' job.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

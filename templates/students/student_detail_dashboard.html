@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ student.name }}'s Profile - SPC{% endblock %}
+
+{% block content %}
+<div class="container py-4 fade-in-up">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-user-graduate me-3 text-primary"></i>Candidate Profile</h2>
+            <p class="text-muted mb-0 mt-1">Detailed metrics and AI placement prediction for {{ student.name }}</p>
+        </div>
+        <div>
+            <a class="btn btn-outline-secondary rounded-pill me-2 px-4 shadow-sm" href="{% url 'students:student_list' %}"><i class="fa-solid fa-arrow-left me-2"></i>Roster</a>
+            <a class="btn btn-primary rounded-pill px-4 shadow-sm" href="{% url 'students:edit_student' student.id %}"><i class="fa-solid fa-pen-to-square me-2"></i>Edit</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Student Information Card -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 20px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);">
+                <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+                    <h5 class="fw-bold text-primary mb-0"><i class="fa-solid fa-address-card me-2"></i>Academic Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border">
+                                <small class="text-muted text-uppercase fw-bold" style="letter-spacing: 1px;">Full Name</small>
+                                <p class="fs-5 mb-0 fw-bold text-dark mt-1">{{ student.name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border">
+                                <small class="text-muted text-uppercase fw-bold" style="letter-spacing: 1px;">Email Address</small>
+                                <p class="fs-6 mb-0 text-dark mt-1"><i class="fa-regular fa-envelope me-2 text-primary"></i><a href="mailto:{{ student.email }}" class="text-decoration-none text-dark">{{ student.email }}</a></p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border">
+                                <small class="text-muted text-uppercase fw-bold" style="letter-spacing: 1px;">Branch & Course</small>
+                                <p class="fs-5 mb-0 text-dark mt-1"><i class="fa-solid fa-building-columns me-2 text-info"></i>{{ student.branch }} - {{ student.course }}</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border position-relative overflow-hidden">
+                                <div class="position-absolute end-0 bottom-0 opacity-10 p-2"><i class="fa-solid fa-graduation-cap" style="font-size: 5rem;"></i></div>
+                                <small class="text-muted text-uppercase fw-bold" style="letter-spacing: 1px;">Current CGPA</small>
+                                <h1 class="display-6 fw-bold mb-0 text-dark mt-1">{{ student.cgpa }} <span class="fs-6 text-muted fw-normal">/ 10</span></h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Prediction Card -->
+        <div class="col-lg-5 delay-1">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 20px; background: linear-gradient(145deg, #2b5876 0%, #4e4376 100%); color: white;">
+                <div class="card-body p-4 d-flex flex-column justify-content-center align-items-center text-center">
+                    
+                    <div class="bg-white bg-opacity-10 p-4 rounded-circle mb-4 shadow-sm" style="backdrop-filter: blur(5px);">
+                        {% if student.cgpa >= 8 %}
+                            <i class="fa-solid fa-rocket text-success" style="font-size: 4rem; filter: drop-shadow(0 0 10px rgba(25, 135, 84, 0.5));"></i>
+                        {% elif student.cgpa >= 6 %}
+                            <i class="fa-solid fa-plane-up text-warning" style="font-size: 4rem; filter: drop-shadow(0 0 10px rgba(255, 193, 7, 0.5));"></i>
+                        {% else %}
+                            <i class="fa-solid fa-paper-plane text-danger" style="font-size: 4rem; filter: drop-shadow(0 0 10px rgba(220, 53, 69, 0.5));"></i>
+                        {% endif %}
+                    </div>
+
+                    <h4 class="fw-bold mb-3 opacity-75 text-uppercase" style="letter-spacing: 2px;">Algorithm Prediction</h4>
+                    
+                    <div class="bg-white bg-opacity-25 rounded-pill px-4 py-2 mb-4 d-inline-block border border-light border-opacity-25">
+                        <span class="fs-4 fw-bold">
+                            {% if prediction %}
+                                {{ prediction }}
+                            {% else %}
+                                {% if student.cgpa >= 8 %}High Probability{% elif student.cgpa >= 6 %}Moderate Probability{% else %}Low Probability{% endif %}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if student.resume %}
+                        <div class="mt-auto w-100 border-top border-light border-opacity-25 pt-4">
+                            <p class="mb-2 opacity-75">Take it a step further with OpenAI:</p>
+                            <a href="{% url 'students:resume_analyzer_student' student.id %}" class="btn btn-light w-100 fw-bold py-2 rounded-pill shadow-sm text-primary hover-scale">
+                                <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Analyze Attached Resume
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="mt-auto w-100 border-top border-light border-opacity-25 pt-4">
+                            <p class="small opacity-75 mb-0"><i class="fa-solid fa-circle-info me-1"></i>Upload a resume in the editing menu to unlock deep AI analysis.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
